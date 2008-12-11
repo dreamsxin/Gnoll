@@ -64,7 +64,7 @@
 #include "scene/include/cscenemanager.h"
 #include "scene/include/cameramanager.h"
 #include "stats/include/cstatsmodule.h"
-#include "log/include/clogmacros.h"
+#include "log/include/clogmodule.h"
 
 #include <boost/shared_ptr.hpp>
 #include <iostream>
@@ -137,7 +137,7 @@ class MousePressedListener : public CMessageListener
 
 			std::ostringstream tmpString;
 			tmpString << temp;
-			GNOLL_LOG() << tmpString.str() << "\n";
+			Gnoll::Log::CLogModule::getInstancePtr()->logMessage( tmpString.str() );
 		}
 
 
@@ -184,7 +184,7 @@ class AllMessageListener : public CMessageListener
 							<< ", " << event.abY 
 							<< ", " << event.abZ
 							<< ", " << event.absOnly << ')';
-			GNOLL_LOG() << tmpString.str() << "\n";
+			Gnoll::Log::CLogModule::getInstancePtr()->logMessage( tmpString.str() );
 
 		}
 
@@ -226,7 +226,7 @@ class MyMessageListener : public CMessageListener
 
 			std::ostringstream tmpString;
 			tmpString << kc;
-			GNOLL_LOG() <<  tmpString.str() << "\n";
+			Gnoll::Log::CLogModule::getInstancePtr()->logMessage( tmpString.str() );
 
 
 			if (kc == OIS::KC_Q)
@@ -266,7 +266,7 @@ class robotcontroler : public CMessageListener
 			 */
 			std::ostringstream tmpString;
 			tmpString << message->getData<OIS::KeyCode>();
-			GNOLL_LOG() <<  tmpString.str() << "\n";
+			Gnoll::Log::CLogModule::getInstancePtr()->logMessage( tmpString.str() );
 
 			//OIS::KeyCode temp2 = message->getData<OIS::KeyCode>();
 
@@ -310,7 +310,7 @@ void deleteRobot(){
 
 		std::ostringstream tmpString;
 		tmpString << "Objet supprime x: " << tempcnt;
-		GNOLL_LOG() <<  tmpString.str() << "\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( tmpString.str() );
 	}
 }
 
@@ -374,7 +374,7 @@ class keydown : public CMessageListener
 	
 						std::ostringstream tmpString;
 						tmpString << "Objet ajoute : " << objcnt;
-						GNOLL_LOG() <<  tmpString.str() << "\n";
+						Gnoll::Log::CLogModule::getInstancePtr()->logMessage( tmpString.str() );
 
 						found = true;
 					}
@@ -609,7 +609,7 @@ void analyzeArguments (int argc, char* argv[])
 	 */
 	if (vm.count("help"))
 	{
-	    cout << desc;
+	    cout << desc << "\n";
 	    exit(1);
 	}
 
@@ -642,7 +642,7 @@ void analyzeArguments (int argc, char* argv[])
 		for (vector<string>::iterator it = lsd.begin(); it != lsd.end(); it++)
 		{
 
-			GNOLL_LOG() << "Adding new load source directory : \n";
+			Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Adding new load source directory : " + *it);
 			shared_ptr<ISource> userLoadChannel(new SourceFile(*it, false, 10));
 			pom->addLoadSource(userLoadChannel);
 			soundManager->addLoadSource(userLoadChannel);
@@ -661,7 +661,7 @@ void analyzeArguments (int argc, char* argv[])
 		for (vector<string>::iterator it = lsd.begin(); it != lsd.end(); it++)
 		{
 
-			GNOLL_LOG() << "Adding new save source directory : \n";
+			Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Adding new save source directory : " + *it);
 			shared_ptr<ISource> userSaveChannel(new SourceFile( *it, true, 10 ));
 			pom->addSaveSource(userSaveChannel);
 			soundManager->addSaveSource(userSaveChannel);
@@ -684,7 +684,7 @@ int main(int argc, char* argv[])
 
 	analyzeArguments (argc, argv);
 
-	GNOLL_LOG() << "Arguments analyzed [DONE]\n";
+	Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Arguments analyzed [DONE]");
 
 
 
@@ -696,11 +696,11 @@ int main(int argc, char* argv[])
 	DynamicObjectManager *pom = DynamicObjectManager::getInstancePtr();
 	SoundManager *soundManager = SoundManager::getInstancePtr();
 
-	GNOLL_LOG() << "Adding load/save source for current path to the DynamicObjectManager\n";
+	Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Adding load/save source for current path to the DynamicObjectManager");
 	pom->addLoadSource(loadChannel);
 	pom->addSaveSource(saveChannel);
 
-	GNOLL_LOG() << "Adding load/save source for current path to the SoundManager\n";
+	Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Adding load/save source for current path to the SoundManager");
 	soundManager->addLoadSource(loadChannel);
 	soundManager->addSaveSource(saveChannel);
 
@@ -720,7 +720,7 @@ int main(int argc, char* argv[])
 	CMessageType framerendered("GRAPHIC_FRAME_RENDERED");
 
 	// A listener
-	GNOLL_LOG() << "Creating Hack listeners\n";
+	Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Creating Hack listeners");
 	shared_ptr<CMessageListener> mylistener(new MyMessageListener);
 	shared_ptr<CMessageListener> mylistener2(new robotcontroler);	
 	shared_ptr<CMessageListener> mylistener3(new AnimationListener);	
@@ -731,7 +731,7 @@ int main(int argc, char* argv[])
 	shared_ptr<CMessageListener> mylistener8(new MousePressedListener);
 
 
-	GNOLL_LOG() << "Instanciating modules...\n";
+	Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Instanciating modules...");
 	CLogModule *logModule = CLogModule::getInstancePtr();
 	CGraphicModule* graphicmanager = CGraphicModule::getInstancePtr();
 	COISInputModule inputmanager;
@@ -740,19 +740,19 @@ int main(int argc, char* argv[])
 	CSoundModule * soundmanager = CSoundModule::getInstancePtr();
 	CInputEventsTranslator* inputEventsTranslator = CInputEventsTranslator::getInstancePtr();
 	CStatsModule* statsModule = CStatsModule::getInstancePtr();
-	GNOLL_LOG() << "Instanciating modules...[DONE]\n";
+	Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Instanciating modules...[DONE]");
 
 	CMessageManager* messageManager = messageModule->getMessageManager();
 
 	try
 	{
-		GNOLL_LOG() << "Initializing message module\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Initializing message module");
 		messageModule->init();
-		GNOLL_LOG() << "Initializing message module [DONE]\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Initializing message module [DONE]");
 
-		GNOLL_LOG() << "Initializing graphic module\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Initializing graphic module");
 		graphicmanager->init();
-		GNOLL_LOG() << "Initializing graphic module [DONE]\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Initializing graphic module [DONE]");
 
 		inputmanager.init();
 		timeModule->init();
@@ -769,28 +769,28 @@ int main(int argc, char* argv[])
 	 * Each of them are handle by the listener thanks to the message manager
 	 */
 	if (messageManager->addListener ( mylistener6, alltype ) == true)
-		GNOLL_LOG() << "Listener ajoute\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener ajoute" );
 
 	if (messageManager->addListener ( mylistener, mytype ) == true)
-		GNOLL_LOG() << "Listener ajoute\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener ajoute" );
 
 	if (messageManager->addListener ( mylistener2, mytype ) == true)
-		GNOLL_LOG() << "Listener ajoute\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener ajoute" );
 
 	if (messageManager->addListener ( mylistener3, framerendered ) == true)
-		GNOLL_LOG() << "Listener ajoute\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener ajoute" );
 
 	if (messageManager->addListener ( mylistener4, mytype2 ) == true)
-		GNOLL_LOG() << "Listener ajoute\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener ajoute" );
 
 	if (messageManager->addListener ( mylistener5, mytype ) == true)
-		GNOLL_LOG() << "Listener ajoute\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener ajoute" );
 
 	if (messageManager->addListener ( mylistener7, mptype ) == true)
-		GNOLL_LOG() << "Listener ajoute\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener ajoute" );
 
 	if (messageManager->addListener ( mylistener8, mrtype ) == true)
-		GNOLL_LOG() << "Listener ajoute\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener ajoute" );
 
 
 	CSceneManager* gSceneManager = new CSceneManager("gSceneManager");
@@ -815,28 +815,28 @@ int main(int argc, char* argv[])
 	 */
 
 	if (messageManager->delListener ( mylistener, mytype ) == true)
-		GNOLL_LOG() << "Listener supprime\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener supprime" );
 
 	if (messageManager->delListener ( mylistener2, mytype ) == true)
-		GNOLL_LOG() << "Listener supprime\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener supprime" );
 
 	if (messageManager->delListener ( mylistener3, framerendered ) == true)
-		GNOLL_LOG() << "Listener supprime\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener supprime" );
 
 	if (messageManager->delListener ( mylistener4, mytype2 ) == true)
-		GNOLL_LOG() << "Listener supprime\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener supprime" );
 
 	if (messageManager->delListener ( mylistener5, mytype ) == true)
-		GNOLL_LOG() << "Listener supprime\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener supprime" );
 
 	if (messageManager->delListener ( mylistener6, alltype ) == true)
-		GNOLL_LOG() << "Listener supprime\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener supprime" );
 
 	if (messageManager->delListener ( mylistener7, mptype ) == true)
-		GNOLL_LOG() << "Listener supprime\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener supprime" );
 
 	if (messageManager->delListener ( mylistener8, mrtype ) == true)
-		GNOLL_LOG() << "Listener supprime\n";
+		Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Listener supprime" );
 
 	 
 	while(objcnt >=0) {
@@ -867,11 +867,11 @@ int main(int argc, char* argv[])
 
 	std::ostringstream tmpString;
 	tmpString << "Size of DO cache before destroying it : " << DynamicObjectManager::getInstancePtr()->getSize();
-	GNOLL_LOG() <<  tmpString.str() << "\n";
+	Gnoll::Log::CLogModule::getInstancePtr()->logMessage( tmpString.str() );
 	DynamicObjectManager::destroy();
 
 
 	// Bye bye 
-	GNOLL_LOG() << "Au revoir !\n";
+	Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "Au revoir !" );
 	return 0;
 }

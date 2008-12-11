@@ -104,19 +104,10 @@ namespace Gnoll
 			}
 			else
 			{
-				size_t blankPosition = msg.find("\n");
-				if( blankPosition != std::string::npos )
+				if( msg.find("\n") != std::string::npos )
 				{
-					str += msg.substr(0, blankPosition);
 					logMessage(str);
-					if (blankPosition <= msg.size())
-					{
-						str = msg.substr(blankPosition + 1);
-					}
-					else
-					{
-						str.erase();
-					}
+					str.erase();
 				}
 				else
 				{
