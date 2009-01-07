@@ -389,5 +389,7 @@ class BaseGnollBuilder:
 
 		env['LIBS'].append('boost_unit_test_framework')
 		# env.Program('testcore', sourceFiles, LIBS='boost_unit_test_framework')
-		env.Program('testcore', sourceFiles)
+		testcore = env.Program('tests/testcore', sourceFiles)
+		env.Test('test.passed', testcore)
+		env.Alias('tests', 'test.passed')
 
