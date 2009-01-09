@@ -55,7 +55,11 @@ namespace Gnoll
 	namespace Scene
 	{
 
-
+		/**
+		 * This class manages the scene content.<br/>
+		 * The world has been divided in chunks, and only the visible ones will be <br/>
+		 * displayed.
+		 */
 		class CSceneManager : public CDynamicObjectProxy
 		{
 
@@ -72,7 +76,47 @@ namespace Gnoll
 				 */
 				shared_ptr<CMessageListener> sceneUpdateListener;
 
+
+				/**
+				 * Setup the sky to be displayed, if any has been configured <br/>
+				 * A sky is defined by two attributes : <br/>
+				 * - skyType which defines the type of sky (eg. dome) <br/>
+				 * - skyMaterial which is the material used for drawing the sky <br/>
+				 */
+				void setupSky();
+
+
+				/**
+				 * Setup the camera used for displaying the scene
+				 */
+				void setupCamera();
+
+
+				/**
+				 * Setup loadedPages attribute
+				 */
+				void setupLoadedPages();
+
+
+				/**
+				 * Setup message listeners and such
+				 */
+				void setupMessages();
+
+
 			public:
+
+
+				/**
+				 * String for message type signaling the scene should be updated
+				 */
+				static const char * UPDATE_MSG_TYPE_STR() {return "UPDATE_SCENE_CONTENT";};
+
+
+				/**
+				 * Message type signaling the scene should be updated
+				 */
+				static const CMessageType UPDATE_MSG_TYPE() {return CMessageType( UPDATE_MSG_TYPE_STR() );};
 
 				/**
 				 * This is a constructor
@@ -87,7 +131,9 @@ namespace Gnoll
 
 
 				/**
-				 * Update scene module
+				 * Update scene module <br/>
+				 * It will loaded visible or pretty soon visible pages and unload <br/>
+				 * those that are not used anymore
 				 */
 				void update();
 
