@@ -19,10 +19,8 @@
 
 
 /*--------------------------------CPage------------------------------------*\
-|   This is a page                                                          |
+|   This is a page. A page is a chunk of the scene.                         |
 |                                                                           |
-|   Changelog :                                                             |
-|               12/04/2007 - Paf - Initial release                          |
 |                                                                           |
 \*-------------------------------------------------------------------------*/
 
@@ -67,10 +65,10 @@ namespace Gnoll
 			/**
 			 * Load the page renderer
 			 */
-			if (this->hasAttribute("PageRenderer"))
+			if (this->hasAttribute( CPage::ATTRIBUTE_PAGE_RENDERER() ))
 			{
 				Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "From " + this->getInstance() + " // Initializing PageRenderer" );
-				shared_ptr<IPageRenderer> pRenderer = this->getAttribute<IPageRenderer>("PageRenderer");
+				shared_ptr<IPageRenderer> pRenderer = this->getAttribute<IPageRenderer>( CPage::ATTRIBUTE_PAGE_RENDERER() );
 				pRenderer->init(this);
 			}
 
@@ -78,9 +76,9 @@ namespace Gnoll
 			/**
 			 * Load static objects
 			 */
-			if (this->hasAttribute("staticObjects"))
+			if (this->hasAttribute( CPage::ATTRIBUTE_STATIC_OBJECTS() ))
 			{
-				shared_ptr< Gnoll::DynamicObject::List > listStaticObjects = this->getAttribute < Gnoll::DynamicObject::List > ("staticObjects");
+				shared_ptr< Gnoll::DynamicObject::List > listStaticObjects = this->getAttribute < Gnoll::DynamicObject::List > ( CPage::ATTRIBUTE_STATIC_OBJECTS() );
 
 				typedef list< shared_ptr<Gnoll::DynamicObject::IAttribute> >::iterator ListIterator;
 
@@ -105,9 +103,9 @@ namespace Gnoll
 				/**
 				 * Unload static objects
 				 */
-				if (this->hasAttribute("staticObjects"))
+				if (this->hasAttribute( CPage::ATTRIBUTE_STATIC_OBJECTS() ))
 				{
-					shared_ptr< Gnoll::DynamicObject::List > listStaticObjects = this->getAttribute < Gnoll::DynamicObject::List > ("staticObjects");
+					shared_ptr< Gnoll::DynamicObject::List > listStaticObjects = this->getAttribute < Gnoll::DynamicObject::List > ( CPage::ATTRIBUTE_STATIC_OBJECTS() );
 
 					typedef list< shared_ptr<Gnoll::DynamicObject::IAttribute> >::iterator ListIterator;
 
@@ -121,17 +119,14 @@ namespace Gnoll
 				}
 
 
-				if (this->hasAttribute("PageRenderer"))
+				if (this->hasAttribute( CPage::ATTRIBUTE_PAGE_RENDERER() ))
 				{
-					shared_ptr<IPageRenderer> pRenderer = this->getAttribute<IPageRenderer>("PageRenderer");
+					shared_ptr<IPageRenderer> pRenderer = this->getAttribute<IPageRenderer>( CPage::ATTRIBUTE_PAGE_RENDERER() );
 					pRenderer->exit();
 				}
 
 				SceneNode* node = sm->getSceneNode( this->getInstance() );
 				node->removeAndDestroyAllChildren();
-
-				//SceneNode* root = sm->getRootSceneNode();
-				//root->removeAndDestroyChild(this->getInstance());
 			}
 		}
 
@@ -185,6 +180,11 @@ namespace Gnoll
 
 			bool result = false;
 
+			/**
+			 * Two cases :
+			 * 1/ This page is initialized and we can directly use the Ogre::SceneNode
+			 * 2/ This page is not initialized => we need to find an initialized neighbor
+			 */
 			if (rootNode)
 			{
 				std::ostringstream tmpString;
@@ -248,6 +248,10 @@ namespace Gnoll
 
 			} else
 			{
+				/**
+				 * We need to check if any direct neighbor is initialized
+				 */
+
 				Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "        root node unavailable (" + this->getInstance() + ")" );;
 				Gnoll::Log::CLogModule::getInstancePtr()->logMessage( "        looking at neighbors" );
 
@@ -256,12 +260,21 @@ namespace Gnoll
 				// Add offset to get current page world position
 				// Construct an Ogre::AxisAlignedBox
 				// Check if visible from ogrecamera
-				const char* neighbors[] = {"northLink", "southLink", "eastLink", "westLink"};
+				const char* neighbors[] = {
+											CPage::ATTRIBUTE_NORTH_LINK(),
+											CPage::ATTRIBUTE_SOUTH_LINK(),
+											CPage::ATTRIBUTE_EAST_LINK(),
+											CPage::ATTRIBUTE_WEST_LINK()
+										};
+
 				DynamicObjectManager *pom = DynamicObjectManager::getInstancePtr();
 
 
 				shared_ptr< Gnoll::DynamicObject::String > loadedNeighbor;
 
+				/**
+				 * Loop through direct neighbors
+				 */
 				std::ostringstream tmpString;
 				for (unsigned int i = 0; (i < 4) && (loadedNeighbor.get() == NULL); i++)
 				{
@@ -289,6 +302,10 @@ namespace Gnoll
 					}
 				}
 
+
+				/**
+				 * We have found an initialized neighbor
+				 */
 				if (loadedNeighbor)
 				{
 					CPage neighborPage(*loadedNeighbor);
@@ -300,35 +317,35 @@ namespace Gnoll
 					//const Ogre::AxisAlignedBox aabbOrig = rootNode->_getWorldAABB();
 					Ogre::AxisAlignedBox aabbOrig;
 
-				//////////////////////////////////////////////////
+					//////////////////////////////////////////////////
 
-				/**
-				 * The OctreeSceneManager doesn't take children nodes in account
-				 * when computing AABB box even though this is taken in account by
-				 * Ogre::SceneNode.
-				 * So this is computed by hand like does Ogre::SceneNode.
-				 */
+					/**
+					 * The OctreeSceneManager doesn't take children nodes in account
+					 * when computing AABB box even though this is taken in account by
+					 * Ogre::SceneNode.
+					 * So this is computed by hand like does Ogre::SceneNode.
+					 */
 
 
-				// Update bounds from own attached objects
-				SceneNode::ObjectIterator oi = rootNode->getAttachedObjectIterator();
-				while (oi.hasMoreElements())
-				{
-					MovableObject *m = oi.getNext();
+					// Update bounds from own attached objects
+					SceneNode::ObjectIterator oi = rootNode->getAttachedObjectIterator();
+					while (oi.hasMoreElements())
+					{
+						MovableObject *m = oi.getNext();
 
-					// Merge world bounds of each object
-					aabbOrig.merge(m->getWorldBoundingBox(true));
-				}
+						// Merge world bounds of each object
+						aabbOrig.merge(m->getWorldBoundingBox(true));
+					}
 
-				// Merge with children
-				Node::ChildNodeIterator oit = rootNode->getChildIterator();
-				while (oit.hasMoreElements())
-				{
-					SceneNode* sceneChild = static_cast<SceneNode*>(oit.getNext());
-					aabbOrig.merge(sceneChild->_getWorldAABB());
-				}
+					// Merge with children
+					Node::ChildNodeIterator oit = rootNode->getChildIterator();
+					while (oit.hasMoreElements())
+					{
+						SceneNode* sceneChild = static_cast<SceneNode*>(oit.getNext());
+						aabbOrig.merge(sceneChild->_getWorldAABB());
+					}
 
-				////////////////////////////////////////
+					////////////////////////////////////////
 
 
 					Ogre::Vector3 min = aabbOrig.getMinimum();
@@ -339,28 +356,28 @@ namespace Gnoll
 					tmpString << "         AABB Max : " << max;
 					Gnoll::Log::CLogModule::getInstancePtr()->logMessage( tmpString.str() );
 
-					shared_ptr<Gnoll::DynamicObject::Float> pageSize = neighborPage.getAttribute<Float>("size");
+					shared_ptr<Gnoll::DynamicObject::Float> pageSize = neighborPage.getAttribute<Float>(CPage::ATTRIBUTE_SIZE());
 
 					Ogre::Vector3 neighborOffset;
 
-					if (strcmp( neighborStr, string(*(this->getAttribute< Gnoll::DynamicObject::String >( "northLink"))).c_str()) == 0)
+					if (strcmp( neighborStr, string(*(this->getAttribute< Gnoll::DynamicObject::String >( CPage::ATTRIBUTE_NORTH_LINK()))).c_str()) == 0)
 					{
 						neighborOffset = Ogre::Vector3(0.0, 0.0, -*pageSize) / 2.0f;
 
-					} else if (strcmp( neighborStr, string(*(this->getAttribute< Gnoll::DynamicObject::String >( "southLink"))).c_str()) == 0)
+					} else if (strcmp( neighborStr, string(*(this->getAttribute< Gnoll::DynamicObject::String >( CPage::ATTRIBUTE_SOUTH_LINK()))).c_str()) == 0)
 					{
 						neighborOffset = Ogre::Vector3(0.0, 0.0, *pageSize) / 2.0f;
 
-					} else if (strcmp( neighborStr, string(*(this->getAttribute< Gnoll::DynamicObject::String >( "eastLink"))).c_str()) == 0)
+					} else if (strcmp( neighborStr, string(*(this->getAttribute< Gnoll::DynamicObject::String >( CPage::ATTRIBUTE_EAST_LINK()))).c_str()) == 0)
 					{
 						neighborOffset = Ogre::Vector3( *pageSize, 0.0, 0.0 ) / 2.0f;
 
-					} else if (strcmp( neighborStr, string(*(this->getAttribute< Gnoll::DynamicObject::String >( "westLink"))).c_str()) == 0)
+					} else if (strcmp( neighborStr, string(*(this->getAttribute< Gnoll::DynamicObject::String >( CPage::ATTRIBUTE_WEST_LINK()))).c_str()) == 0)
 					{
 						neighborOffset = Ogre::Vector3( -(*pageSize), 0.0, 0.0 ) / 2.0f;
 					} else {
 						neighborOffset = Ogre::Vector3( 0.0, 0.0, 0.0 );
-                                        }
+                    }
 
 					Ogre::AxisAlignedBox aabb(
 														min.x + neighborOffset.x,

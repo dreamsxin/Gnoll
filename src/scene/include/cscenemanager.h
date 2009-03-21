@@ -104,7 +104,50 @@ namespace Gnoll
 				void setupMessages();
 
 
+				/**
+				 * Translate all visible pages by vector _translate
+				 * @param _translate amount to translate pages of
+				 */
+				void translateVisiblePages(const  Ogre::Vector3 _translate);
+
+
 			public:
+
+
+				/**
+				 * The sky type defines the type of sky (eg. dome)
+				 * @return Attribute name for the sky type attribute
+				 */
+				inline static const char * ATTRIBUTE_SKY_TYPE() {return "skyType";}
+
+
+				/**
+				 * The sky material defines which material is used for drawing the sky
+				 * @return Attribute name for the sky material attribute
+				 */
+				inline static const char * ATTRIBUTE_SKY_MATERIAL() {return "skyMaterial";}
+
+
+				/**
+				 * The current camera is the camera having currently the focus
+				 * @return Attribute name for the current camera attribute
+				 */
+				inline static const char * ATTRIBUTE_CURRENT_CAMERA() {return "currentCamera";}
+
+
+				/**
+				 * The loaded pages attribute is the list of all currently loaded pages
+				 * @return Attribute name for the loaded pages attribute
+				 */
+				inline static const char * ATTRIBUTE_LOADED_PAGES() {return "loadedPages";}
+
+
+				/**
+				 * The focused page is the page where the camera is currently located.<br/>
+				 * This is also the page currently at the center of the universe
+				 * @return Attribute name for the focused page attribute
+				 */
+				inline static const char * ATTRIBUTE_FOCUSED_PAGE() {return "focusedPage";}
 
 
 				/**
