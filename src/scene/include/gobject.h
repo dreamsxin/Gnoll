@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Paf                                             *
+ *   Copyright (C) 2009 by Bruno Mahe                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,100 +18,97 @@
  ***************************************************************************/
 
 
-/*-------------------------------Inherits----------------------------------*\
-|   This is an inheritance attribute for DynamicObject                      |
+/*-------------------------------GObject-----------------------------------*\
+|   This is a game object                                                   |
+|                                                                           |
 |                                                                           |
 \*-------------------------------------------------------------------------*/
 
 
+#ifndef __GOBJECT_H__
+#define __GOBJECT_H__
 
-#ifndef __INHERITS_H__
-#define __INHERITS_H__
 
-
-#include "iattribute.h"
-#include "string.h"
-#include "attributehandlerregistry.h"
-
+#include "../../dynamicobject/include/dynamicobject.h"
+#include "cpage.h"
+#include "icomponent.h"
 
 using namespace std;
 using namespace boost;
+using namespace Gnoll::Core;
+using namespace Gnoll::DynamicObject;
+using namespace Ogre;
+
 
 namespace Gnoll
 {
-	namespace DynamicObject
+	namespace Scene
 	{
 
 		/**
-		 *	This is an inheritance attribute for DynamicObject.
+		 * This is a game object
 		 */
-		class Inherits : public IAttribute
+		class GObject : public Gnoll::DynamicObject::DynamicObject
 		{
-			private:
-
-				String m_parent;
 
 			public:
 
-
 				/**
-				 * Returns Inherits's DynamicObject name
-				 * @return Inherits's DynamicObject name
+				 * Returns GObject's DynamicObject name
+				 * @return GObject's DynamicObject name
 				 */
-				inline static const char * DYNAMIC_OBJECT_NAME() {return "inherits";}
-
+				inline static const char * DYNAMIC_OBJECT_NAME() {return "gobject";}
 
 				/**
-				 * This is a constructor
+				 * Returns attribute name "components".<br/>
+				 * This attribute contains the list of all components belonging to the GObject
+				 * @return The attribute name "components"
 				 */
-				Inherits(String _parent = String());
+				inline static const char * ATTRIBUTE_COMPONENTS() {return "components";}
+
 
 
 				/**
-				 * This is a destructor
+				 * Constructor
 				 */
-				~Inherits();
+				GObject();
 
 
 				/**
-				 * Get the parent DynamicObject instance name
-				 * @return Parent DynamicObject instance name
+				 * Destructor
 				 */
-				String getParent();
+				virtual ~GObject();
 
 
 				/**
-				 * Set the parent DynamicObject instance name
-				 * @param _parent Parent DynamicObject instance name
-				 */
-				void setParent (String _parent);
-
-
-				/**
-				 * This method serialize the object. <br/>
-				 * It has to be implemented by all classes that inherits from this class.
+				 * This method serialize the GObject and all its attributes
 				 *
-				 * @return This return the object as a XML tree
+				 * @return This return the GObject as a XML tree
 				 */
 				virtual shared_ptr<xmlpp::Document> serializeXML();
 
 
 				/**
-				 * This method deserialize the object. <br/>
-				 * This method initializes this object thanks to a XML tree given as a parameter. <br/>
-				 * It has to be implemented by all classes that inherits from this class.
+				 * This method deserialize the GObject and all its attributes from a XML element
 				 *
-			  	 * @param _element This is the XML tree containing the state of this object
+				 * @param _element The XML Element to parse data from
 				 */
-				virtual void deSerializeXML( xmlpp::Element* _element );
+				//virtual void deSerializeXML( xmlpp::Element* _element );
 
 
-				virtual void applyInheritance() {}
+				/**
+				 * Initialize all sub-components
+				 * @param page Page where is located the DynamicObject
+				 */
+				virtual void init(CPage* page);
 
 
+				/**
+				 * Exits all sub-components
+				 */
+				 virtual void exit();
 		};
-
 	}
 }
 
-#endif // __INHERITS_H__
+#endif // __GOBJECT_H__

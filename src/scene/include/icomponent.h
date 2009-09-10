@@ -1,6 +1,5 @@
-
 /***************************************************************************
- *   Copyright (C) 2006 by Puzzle Team                                     *
+ *   Copyright (C) 2009 by Bruno Mahé                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -19,47 +18,64 @@
  ***************************************************************************/
 
 
-/*---------------------------DefaultCameraFreeFlyListener--------------*\
-|   This is a message's listener for camera free fly                        |
-|                                                                           |
-|   Changelog :                                                             |
-|               04/08/2008 - Gabriel - Initial release                      |
+/*-----------------------------IComponent----------------------------------*\
+|   This is an interface for components                                     |
 |                                                                           |
 \*-------------------------------------------------------------------------*/
 
-#ifndef INCLUDED_DEFAULTCAMERAFREEFLYLISTENER_H
-#define INCLUDED_DEFAULTCAMERAFREEFLYLISTENER_H
 
-#include "cmessagelistenercamera.h"
+#ifndef __ICOMPONENT_H__
+#define __ICOMPONENT_H__
+
+
+#include "../../dynamicobject/include/dynamicobject.h"
+#include "cpage.h"
+
+
 
 namespace Gnoll
 {
 	namespace Scene
 	{
-		class DefaultCameraFreeFlyListener : public CMessageListenerCamera
+		class GObject;
+
+		/**
+		 * This an interface describing components
+		 */
+		class IComponent : public Gnoll::DynamicObject::DynamicObject
 		{
-		private:
-			// HACK
-			float borderX, borderY;
 
-		public:
-			/**
-			 * This is a constructor
-			 */
-			DefaultCameraFreeFlyListener();
 
-			/**
-			 * This is a destructor
-			 */
-			~DefaultCameraFreeFlyListener();
+			public:
 
-			/**
-			 * This method is called in order to process a message
-			 * @param message The message this method will have to process
-			 */
-			void handle ( shared_ptr<CMessage> message );
+
+				/**
+				 * This is a constructor
+				 */
+				IComponent() {}
+
+
+				/**
+				 * This is a destructor
+				 */
+				virtual ~IComponent() {}
+
+
+				/**
+				 * Component initialization
+				 * @param parent DynamicObject this component belongs to
+				 * @param page Page where is located the parent DynamicObject
+				 */
+				virtual void init(Gnoll::Scene::GObject* parent, Gnoll::Scene::CPage* page) = 0;
+
+
+				/**
+				 * Component exits
+				 */
+				 virtual void exit() = 0;
+
 		};
-	};
-};
+	}
+}
 
-#endif
+#endif // __IComponent_H__

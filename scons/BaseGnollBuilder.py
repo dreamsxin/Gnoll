@@ -189,6 +189,9 @@ class BaseGnollBuilder:
 
 		configProject = {}
 
+		if config.CheckCXXHeader('signal.h'):
+			configProject['HAVE_SIGNAL'] = '1'
+
 		boostConfig    = self.checkBoost(env, config)
 		openALConfig   = self.checkOpenAL(env, config)
 		vorbisConfig   = self.checkVorbis(env, config)
@@ -283,6 +286,7 @@ class BaseGnollBuilder:
 			'src/input/src/ckeyboardeventstranslator.cpp',
 			'src/input/src/ckeyboardstatetranslator.cpp',
 			'src/input/src/cmousemotioneventstranslator.cpp',
+			'src/input/src/cmousemotionstatetranslator.cpp',
 			'src/input/src/cmousebuttoneventstranslator.cpp',
 			'src/input/src/cmousebuttonstatetranslator.cpp',
 			'src/input/src/ckeyboardeventstrigger.cpp',
@@ -318,6 +322,12 @@ class BaseGnollBuilder:
 			'src/scene/src/camerafreeflyfactory.cpp',
 			'src/scene/src/cameramanager.cpp',
 			'src/scene/src/cstaticgobject.cpp',
+			'src/scene/src/cogremeshcomponent.cpp',
+			'src/scene/src/cpositioncomponent.cpp',
+			'src/scene/src/cscalingcomponent.cpp',
+			'src/scene/src/crotationcomponent.cpp',
+			'src/scene/src/cogreanimatedmeshcomponent.cpp',
+			'src/scene/src/gobject.cpp',
 			'src/scene/src/ogrecamerawrapper.cpp',
 			'src/scene/src/ogrecamerasplinewrapper.cpp'
 			]

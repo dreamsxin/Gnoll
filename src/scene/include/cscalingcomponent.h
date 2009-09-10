@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Paf                                             *
+ *   Copyright (C) 2009 by Bruno Mahe                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,116 +18,103 @@
  ***************************************************************************/
 
 
-/*--------------------------CMeshPageRenderer------------------------------*\
-|   This is a page renderer for pages made of a mesh                        |
+/*--------------------------CScalingComponent-----------------------------*\
+|   This is a component able to set a scale                                 |
 |                                                                           |
-|   Changelog :                                                             |
-|               12/04/2007 - Paf - Initial release                          |
 |                                                                           |
 \*-------------------------------------------------------------------------*/
 
+#ifndef CSCALINGCOMPONENT_H_
+#define CSCALINGCOMPONENT_H_
 
-#ifndef __CMESHPAGERENDERER_H__
-#define __CMESHPAGERENDERER_H__
-
-
+#include "cpage.h"
+#include "icomponent.h"
+#include "../../core/include/cmessagelistener.h"
+#include "../include/gobject.h"
 #include <boost/shared_ptr.hpp>
-#include <libxml++/libxml++.h>
-#include <glibmm/ustring.h>
 
-
-#include "../../dynamicobject/include/iattribute.h"
-#include "ipagerenderer.h"
-#include <string>
-
-
-using namespace std;
 using namespace boost;
+using namespace Gnoll::Scene;
 using namespace Gnoll::Core;
 
 namespace Gnoll
 {
+
 	namespace Scene
 	{
 
-		class CMeshPageRenderer : public IPageRenderer
+		/**
+		 * This is a component able to display Ogre models
+		 */
+		class CScalingComponent: public Gnoll::Scene::IComponent
 		{
-
 			private:
+				Ogre::Vector3                scale;
 
-				string m_meshName;
+				Gnoll::Scene::GObject*       parent;
 
-				CPage*  m_parentPage;
+				shared_ptr<CMessageListener> scalingListener;
 
 			public:
 
+				/**
+				 * Returns CPositionComponent's DynamicObject name
+				 * @return CPositionComponent's DynamicObject name
+				 */
+				inline static const char * DYNAMIC_OBJECT_NAME() {return "CScalingComponent";}
 
 
 				/**
-				 * Returns CMeshPageRenderer's DynamicObject name
-				 * @return CMeshPageRenderer's DynamicObject name
+				 * Returns attribute name "pos".<br/>
+				 * This attribute contains the position of the mesh
+				 * @return The attribute name "pos"
 				 */
-				inline static const char * DYNAMIC_OBJECT_NAME() {return "CMeshPageRenderer";}
-
-
-				/**
-				 * Returns attribute name "meshName".<br/>
-				 * This attribute contains the name of the mesh to be rendered
-				 * @return The attribute name "meshName"
-				 */
-				inline static const char * ATTRIBUTE_MESH_NAME() {return "meshName";}
+				inline static const char * ATTRIBUTE_SCALE() {return "scale";}
 
 
 				/**
 				 * This is a constructor
 				 */
-				CMeshPageRenderer();
+				CScalingComponent();
 
 
 				/**
 				 * This is a destructor
 				 */
-				virtual ~CMeshPageRenderer();
+				virtual ~CScalingComponent();
 
 
 				/**
-				 * Page Renderer initialization
+				 * Settor of the scaling
+				 * @param pos The new scaling
 				 */
-				void init( CPage* _parentPage );
+				void setScaling(const Ogre::Vector3& val) { scale = val; }
 
 
 				/**
-				 * Update method
+				 * Component initialization
+				 * @param parent DynamicObject this component belongs to
+				 * @param page Page where is located the parent DynamicObject
 				 */
-				void update();
+				virtual void init(Gnoll::Scene::GObject* parent, Gnoll::Scene::CPage* page);
 
 
 				/**
-				 * Page Renderer exits
+				 * Component exits
 				 */
-				 void exit();
+				 virtual void exit();
 
 
 				/**
-				 * This method serialize the object. <br/>
-				 * It has to be implemented by all classes that inherits from this class.
+				 * This method serialize the CPositionComponent and all its attributes
 				 *
-				 * @return This return the object as a XML tree
+				 * @return This return the CPositionComponent as a XML tree
 				 */
 				virtual shared_ptr<xmlpp::Document> serializeXML();
 
-
-				/**
-				 * This method deserialize the object. <br/>
-				 * This method initializes this object thanks to a XML tree given as a parameter. <br/>
-				 * It has to be implemented by all classes that inherits from this class.
-				 *
-				 * @param _element This is the XML tree containing the state of this object
-				 */
-				virtual void deSerializeXML( xmlpp::Element* _element );
 
 		};
 	}
 }
 
-#endif // __CMESHPAGERENDERER_H__
+#endif /* CSCALINGCOMPONENT_H_ */

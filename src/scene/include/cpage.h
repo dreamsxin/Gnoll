@@ -107,7 +107,7 @@ namespace Gnoll
 				 * This is a list of all static objects included in the page
 				 * @return List of static objects to be rendered
 				 */
-				inline static const char * ATTRIBUTE_STATIC_OBJECTS() {return "staticObjects";}
+				inline static const char * ATTRIBUTE_GAME_OBJECTS() {return "gameObjects";}
 
 
 				/**
@@ -157,6 +157,11 @@ namespace Gnoll
 				 * @return Returns whether this page is visible from the camera name passed
 				 */
 				bool isVisibleFromCamera(shared_ptr< Gnoll::DynamicObject::String > _cameraName) const;
+
+				/**
+				 * Initialize the position of the page from neighbor
+				 */
+				void initPosition();
 		};
 	}
 }

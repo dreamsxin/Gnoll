@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Paf                                             *
+ *   Copyright (C) 2009 by Bruno Mahe                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,116 +18,103 @@
  ***************************************************************************/
 
 
-/*--------------------------CMeshPageRenderer------------------------------*\
-|   This is a page renderer for pages made of a mesh                        |
+/*--------------------------CRotationComponent-----------------------------*\
+|   This is a component able to set a rotation                              |
 |                                                                           |
-|   Changelog :                                                             |
-|               12/04/2007 - Paf - Initial release                          |
 |                                                                           |
 \*-------------------------------------------------------------------------*/
 
+#ifndef CROTATIONCOMPONENT_H_
+#define CROTATIONCOMPONENT_H_
 
-#ifndef __CMESHPAGERENDERER_H__
-#define __CMESHPAGERENDERER_H__
-
-
+#include "cpage.h"
+#include "icomponent.h"
+#include "../../core/include/cmessagelistener.h"
+#include "../include/gobject.h"
 #include <boost/shared_ptr.hpp>
-#include <libxml++/libxml++.h>
-#include <glibmm/ustring.h>
 
-
-#include "../../dynamicobject/include/iattribute.h"
-#include "ipagerenderer.h"
-#include <string>
-
-
-using namespace std;
 using namespace boost;
+using namespace Gnoll::Scene;
 using namespace Gnoll::Core;
 
 namespace Gnoll
 {
+
 	namespace Scene
 	{
 
-		class CMeshPageRenderer : public IPageRenderer
+		/**
+		 * This is a component able to display Ogre models
+		 */
+		class CRotationComponent: public Gnoll::Scene::IComponent
 		{
-
 			private:
+				Ogre::Vector3                rotation;
 
-				string m_meshName;
+				Gnoll::Scene::GObject*       parent;
 
-				CPage*  m_parentPage;
+				shared_ptr<CMessageListener> rotationListener;
 
 			public:
 
+				/**
+				 * Returns CRotationComponent's DynamicObject name
+				 * @return CRotationComponent's DynamicObject name
+				 */
+				inline static const char * DYNAMIC_OBJECT_NAME() {return "CRotationComponent";}
 
 
 				/**
-				 * Returns CMeshPageRenderer's DynamicObject name
-				 * @return CMeshPageRenderer's DynamicObject name
+				 * Returns attribute name "pos".<br/>
+				 * This attribute contains the rotation of the mesh
+				 * @return The attribute name "pos"
 				 */
-				inline static const char * DYNAMIC_OBJECT_NAME() {return "CMeshPageRenderer";}
-
-
-				/**
-				 * Returns attribute name "meshName".<br/>
-				 * This attribute contains the name of the mesh to be rendered
-				 * @return The attribute name "meshName"
-				 */
-				inline static const char * ATTRIBUTE_MESH_NAME() {return "meshName";}
+				inline static const char * ATTRIBUTE_ROTATION() {return "rotation";}
 
 
 				/**
 				 * This is a constructor
 				 */
-				CMeshPageRenderer();
+				CRotationComponent();
 
 
 				/**
 				 * This is a destructor
 				 */
-				virtual ~CMeshPageRenderer();
+				virtual ~CRotationComponent();
 
 
 				/**
-				 * Page Renderer initialization
+				 * Settor of the rotation
+				 * @param pos The new rotation
 				 */
-				void init( CPage* _parentPage );
+				void setRotation(const Ogre::Vector3& rot) { rotation = rot; }
 
 
 				/**
-				 * Update method
+				 * Component initialization
+				 * @param parent DynamicObject this component belongs to
+				 * @param page Page where is located the parent DynamicObject
 				 */
-				void update();
+				virtual void init(Gnoll::Scene::GObject* parent, Gnoll::Scene::CPage* page);
 
 
 				/**
-				 * Page Renderer exits
+				 * Component exits
 				 */
-				 void exit();
+				 virtual void exit();
 
 
 				/**
-				 * This method serialize the object. <br/>
-				 * It has to be implemented by all classes that inherits from this class.
+				 * This method serialize the CRotationComponent and all its attributes
 				 *
-				 * @return This return the object as a XML tree
+				 * @return This return the CRotationComponent as a XML tree
 				 */
 				virtual shared_ptr<xmlpp::Document> serializeXML();
 
-
-				/**
-				 * This method deserialize the object. <br/>
-				 * This method initializes this object thanks to a XML tree given as a parameter. <br/>
-				 * It has to be implemented by all classes that inherits from this class.
-				 *
-				 * @param _element This is the XML tree containing the state of this object
-				 */
-				virtual void deSerializeXML( xmlpp::Element* _element );
 
 		};
 	}
 }
 
-#endif // __CMESHPAGERENDERER_H__
+#endif /* CROTATIONCOMPONENT_H_ */

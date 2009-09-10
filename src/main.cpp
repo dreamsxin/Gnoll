@@ -60,6 +60,7 @@
 #include "stats/include/cstatsmodule.h"
 #include "log/include/clogmacros.h"
 #include "input/include/ctranslationevents.h"
+#include "config.h"
 
 #include <boost/shared_ptr.hpp>
 #include <iostream>
@@ -69,6 +70,10 @@
 #include <boost/program_options.hpp>
 
 #include <Ogre.h>
+
+#ifdef HAVE_SIGNAL
+	#include <signal.h>
+#endif
 
 using namespace boost;
 using namespace boost::program_options;
@@ -100,7 +105,6 @@ namespace Gnoll
 			CSoundModule *          soundmanager;
 			CInputEventsTranslator* inputEventsTranslator;
 			CStatsModule*           statsModule;
-			CMessageManager*        messageManager;
 
 
 			bool done;
@@ -108,6 +112,11 @@ namespace Gnoll
 			void analyzeArguments (int argc, char* argv[]);
 
 		public:
+
+			bool getDone() {return done;}
+
+			void setDone(bool _done) {done = _done;}
+
 			void init(int argc, char* argv[]);
 
 			void init();
@@ -156,7 +165,9 @@ namespace Gnoll
 	{
 		Gnoll::Input::ActionEvent ae = message->getData<Gnoll::Input::ActionEvent>();
 		if(ae.action == "APPLICATION_QUIT")
-			Gnoll::Application::getInstancePtr()->exit();
+		{
+			Gnoll::Application::getInstancePtr()->setDone(1);
+		}
 	}
 
 
@@ -298,7 +309,6 @@ namespace Gnoll
 		statsModule           = CStatsModule::getInstancePtr();
 		GNOLL_LOG() << "Instanciating modules...[DONE]\n";
 
-		CMessageManager* messageManager = messageModule->getMessageManager();
 
 		try
 		{
@@ -355,6 +365,7 @@ namespace Gnoll
 	bool Application::quit_OnClick(const CEGUI::EventArgs &args)
 	{
 		done = 1;
+		return done;
 	}
 
 
@@ -389,7 +400,6 @@ namespace Gnoll
 		Gnoll::Stats::CStatsModule::destroy();
 		CSoundModule::destroy();
 		CTimeModule::destroy();
-		CameraManager::destroy();
 		CInputEventsTranslator::destroy();
 		CGraphicModule::destroy();
 		CMessageModule::destroy();
@@ -408,6 +418,22 @@ namespace Gnoll
 	}
 };
 
+
+//
+//===============================================================================
+// Terminate function when we receive a SIGKILL signal to destroy
+// correctly managers (like input)
+//===============================================================================
+//
+#ifdef HAVE_SIGNAL
+	void terminate (int param)
+	{
+		printf ("Terminating program...\n");
+		Gnoll::Application::getInstancePtr()->setDone(true);
+	}
+#endif
+
+
 //
 //===============================================================================
 // Start point of the application
@@ -418,6 +444,14 @@ int main(int argc, char* argv[])
 	srand ( time(NULL) );
 
 	Gnoll::Application* app = Gnoll::Application::getInstancePtr();
+
+	#ifdef HAVE_SIGNAL
+		struct sigaction action;
+		action.sa_handler = terminate;
+	sigaction(SIGKILL, &action, NULL);
+		sigaction(SIGTERM, &action, NULL);
+	#endif
+
 	app->init(argc, argv);
 	app->process();
 	app->exit();

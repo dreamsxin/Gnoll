@@ -44,6 +44,7 @@ namespace Gnoll
 	{
 		DefaultCameraFreeFlyListener::DefaultCameraFreeFlyListener()
 		{
+			borderX = borderY = -1;
 		}
 
 		DefaultCameraFreeFlyListener::~DefaultCameraFreeFlyListener()
@@ -68,15 +69,10 @@ namespace Gnoll
 			 */
 			shared_ptr<CameraFreeFly> pCam = static_pointer_cast<CameraFreeFly>(cam);
 
-			// KEYBOARD
-			if(ae.action == "ACTION_ROTATE_LEFT")
-				pCam->rotateAroundAxisY(ae.intensity * lasttime);
-			if(ae.action == "ACTION_ROTATE_RIGHT")
-				pCam->rotateAroundAxisY(ae.intensity * lasttime * -1);
-			if(ae.action == "ACTION_ROTATE_UP")
-				pCam->rotateAroundAxisX(ae.intensity * lasttime);
-			if(ae.action == "ACTION_ROTATE_DOWN")
-				pCam->rotateAroundAxisX(ae.intensity * lasttime * -1);
+			if(ae.action == "BORDER_X")
+				borderX = ae.intensity;
+			if(ae.action == "BORDER_Y")
+				borderY = ae.intensity;
 
 			if(ae.action == "ACTION_STRAFE_LEFT")
 				pCam->strafeLR(ae.intensity * lasttime * -1);
@@ -87,19 +83,28 @@ namespace Gnoll
 			if(ae.action == "ACTION_STEP_BACKWARD")
 				pCam->move(ae.intensity * lasttime * -1);
 
-			// MOUSE
 			float sensibility = -20.0f;  // Negative pour inverser les axes en meme temps
-			if(ae.action == "ACTION_ROTATE_CAMERA_LEFT")
-				pCam->rotateAroundAxisY(ae.intensity * lasttime * sensibility);
-			if(ae.action == "ACTION_ROTATE_CAMERA_RIGHT")
-				pCam->rotateAroundAxisY(ae.intensity * lasttime * sensibility);
-			if(ae.action == "ACTION_ROTATE_CAMERA_UP")
-				pCam->rotateAroundAxisX(ae.intensity * lasttime * sensibility);
-			if(ae.action == "ACTION_ROTATE_CAMERA_DOWN")
-				pCam->rotateAroundAxisX(ae.intensity * lasttime * sensibility);
+
+			if(borderX >= 0)
+			{
+				if(ae.action == "ACTION_ROTATE_CAMERA_LEFT" && borderX < 0.1)
+					pCam->rotateAroundAxisY(ae.intensity * lasttime * sensibility);
+
+				if(ae.action == "ACTION_ROTATE_CAMERA_RIGHT" && borderX > 0.9)
+					pCam->rotateAroundAxisY(ae.intensity * lasttime * sensibility);
+			}
+
+			if(borderY >= 0)
+			{
+				if(ae.action == "ACTION_ROTATE_CAMERA_UP" && borderY > 0.9)
+					pCam->rotateAroundAxisX(ae.intensity * lasttime * sensibility);
+
+				if(ae.action == "ACTION_ROTATE_CAMERA_DOWN" && borderY < 0.1)
+					pCam->rotateAroundAxisX(ae.intensity * lasttime * sensibility);
+			}
 
 			// Update
-			cam->update(lasttime);
+			pCam->update(lasttime);
 		}
 	};
 };
