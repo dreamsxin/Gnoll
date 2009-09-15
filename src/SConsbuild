@@ -48,6 +48,7 @@ sourceFiles.append(Glob('./stats/src/*.cpp', strings=True))
 sourceFiles.append(Glob('./log/src/*.cpp', strings=True))
 sourceFiles.append(Glob('./scene/src/*.cpp', strings=True))
 sourceFiles.append(Glob('./core/src/*.cpp', strings=True))
+sourceFiles.append(Glob('./core/messages/src/*.cpp', strings=True))
 sourceFiles.append(Glob('./input/src/*.cpp', strings=True))
 
 env.Alias('build', env.Program('../../gnoll', sourceFiles))
