@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Puzzle Team                                     *
+ *   Copyright (C) 2006 by Gnoll Team                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,39 +17,23 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-/*---------------------------cmessagetype.cpp------------------------------*\
-|   This is a type of a message                                             |
-|                                                                           |
-|   Changelog :                                                             |
-|               05/15/2006 - Paf - Initial release                          |
-|               04/10/2006 - Gabriel - Add namespace Gnoll and Core         |
-|                                                                           |
-\*-------------------------------------------------------------------------*/
-
-
-#include "../include/cmessagetype.h"
+#include "../include/exceptions.h"
 
 namespace Gnoll
 {
 	namespace Core
 	{
-		bool CMessageType::operator== (CMessageType const & op)
+		namespace Messages
 		{
-			return (this->m_msgtype == op.m_msgtype);
-
+			namespace Exceptions
+			{
+				const char* InvalidMessage::what() const throw()
+				{
+					return "Message type is invalid";
+				}
+			}
 		}
+	}
+}
 
 
-		bool CMessageType::operator!= (CMessageType const & op)
-		{
-			return !(*this == op);
-		}
-
-
-		bool CMessageType::operator< (CMessageType const & op) const
-		{
-			return ( this->m_msgtype < op.m_msgtype );
-		}
-	};
-};

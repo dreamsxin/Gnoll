@@ -17,13 +17,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 /*--------------------------COgreAnimatedMeshComponent---------------------*\
 |   This is a component able to display Ogre models that are animated       |
 |                                                                           |
 |                                                                           |
 \*-------------------------------------------------------------------------*/
-
 
 #include "../../dynamicobject/include/float.h"
 #include "../../dynamicobject/include/string.h"
@@ -31,8 +29,7 @@
 #include "../../log/include/clogmacros.h"
 #include "../../graphic/include/cgraphicmodule.h"
 #include "../../stats/include/cstatsmodule.h"
-
-#include "../../core/include/cmessagetype.h"
+#include "../../core/messages/include/messagetype.h"
 #include "../../core/include/cmessagemodule.h"
 #include "../include/cogreanimatedmeshcomponent.h"
 #include "../include/gobject.h"
@@ -44,7 +41,7 @@ namespace Gnoll {
 
 	namespace Scene {
 
-		class OgreAnimatedMeshListener : public CMessageListener
+		class OgreAnimatedMeshListener : public Messages::Listener
 		{
 			private:
 				COgreAnimatedMeshComponent* component;
@@ -72,7 +69,7 @@ namespace Gnoll {
 				}
 		};
 
-		class OgreAnimatedMeshPositionListener : public CMessageListener
+		class OgreAnimatedMeshPositionListener : public Messages::Listener
 		{
 			private:
 				COgreAnimatedMeshComponent* component;
@@ -101,7 +98,7 @@ namespace Gnoll {
 		};
 
 
-		class OgreAnimatedMeshScalingListener : public CMessageListener
+		class OgreAnimatedMeshScalingListener : public Messages::Listener
 		{
 			private:
 				COgreAnimatedMeshComponent* component;
@@ -130,7 +127,7 @@ namespace Gnoll {
 		};
 
 
-		class OgreAnimatedMeshRotationListener : public CMessageListener
+		class OgreAnimatedMeshRotationListener : public Messages::Listener
 		{
 			private:
 				COgreAnimatedMeshComponent* component;
@@ -159,7 +156,7 @@ namespace Gnoll {
 		};
 
 
-		class OgreAnimatedMeshAnimationStateListener : public CMessageListener
+		class OgreAnimatedMeshAnimationStateListener : public Messages::Listener
 		{
 			private:
 				COgreAnimatedMeshComponent* component;
@@ -331,7 +328,7 @@ namespace Gnoll {
 			}
 
 			/**
-		     * Select the first by default
+			 * Select the first by default
 			 */
 			GNOLL_LOG() << this->getInstance() << " : Load animation states : " << "\n";
 			AnimationStateIterator iter = animationStateSet->getAnimationStateIterator();
@@ -344,7 +341,7 @@ namespace Gnoll {
 
 
 			/**
-		     * Restore the default animation state, if none so no animation by default
+			 * Restore the default animation state, if none so no animation by default
 			 */
 			shared_ptr< Gnoll::DynamicObject::String > default_animationState ( new Gnoll::DynamicObject::String());
 			m_currentAnimation = *(this->getAttributeOrDefault < Gnoll::DynamicObject::String > (COgreAnimatedMeshComponent::ATTRIBUTE_ANIMATIONSTATE(), default_animationState));
@@ -362,15 +359,15 @@ namespace Gnoll {
 			 * Register the listener
 			 */
 			CMessageModule*  messageModule  = CMessageModule::getInstancePtr();
-			CMessageManager* messageManager = messageModule->getMessageManager();
+			Messages::Messenger* messageManager = messageModule->getMessageManager();
 
-			componentListener = shared_ptr<CMessageListener> (new OgreAnimatedMeshListener(this));
-			componentPositionListener = shared_ptr<CMessageListener> (new OgreAnimatedMeshPositionListener(this));
-			componentScalingListener = shared_ptr<CMessageListener> (new OgreAnimatedMeshScalingListener(this));
-			componentRotationListener = shared_ptr<CMessageListener> (new OgreAnimatedMeshRotationListener(this));
-			componentAnimationStateListener = shared_ptr<CMessageListener> (new OgreAnimatedMeshAnimationStateListener(this));
+			componentListener = shared_ptr<Messages::Listener> (new OgreAnimatedMeshListener(this));
+			componentPositionListener = shared_ptr<Messages::Listener> (new OgreAnimatedMeshPositionListener(this));
+			componentScalingListener = shared_ptr<Messages::Listener> (new OgreAnimatedMeshScalingListener(this));
+			componentRotationListener = shared_ptr<Messages::Listener> (new OgreAnimatedMeshRotationListener(this));
+			componentAnimationStateListener = shared_ptr<Messages::Listener> (new OgreAnimatedMeshAnimationStateListener(this));
 
-			messageManager->addListener ( componentListener, Gnoll::Core::CMessageType("GRAPHIC_FRAME_RENDERED") );
+			messageManager->addListener ( componentListener, Gnoll::Core::Messages::MessageType("GRAPHIC_FRAME_RENDERED") );
 			messageManager->addListener ( componentPositionListener, "SET_POSITION_" + m_parent->getInstance() );
 			messageManager->addListener ( componentScalingListener, "SET_SCALING_" + m_parent->getInstance() );
 			messageManager->addListener ( componentRotationListener, "SET_ROTATION_" + m_parent->getInstance() );
@@ -408,9 +405,9 @@ namespace Gnoll {
 			 * Unregister the listener
 			 */
 			CMessageModule*  messageModule  = CMessageModule::getInstancePtr();
-			CMessageManager* messageManager = messageModule->getMessageManager();
+			Messages::Messenger* messageManager = messageModule->getMessageManager();
 
-			messageManager->delListener ( componentListener, Gnoll::Core::CMessageType("GRAPHIC_FRAME_RENDERED") );
+			messageManager->delListener ( componentListener, Gnoll::Core::Messages::MessageType("GRAPHIC_FRAME_RENDERED") );
 			messageManager->delListener ( componentPositionListener, "SET_POSITION_" + m_parent->getInstance() );
 			messageManager->delListener ( componentScalingListener, "SET_SCALING_" + m_parent->getInstance() );
 			messageManager->delListener ( componentRotationListener, "SET_ROTATION_" + m_parent->getInstance() );

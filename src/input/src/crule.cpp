@@ -17,39 +17,26 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-/*-------------------------CInputEventsTranslator.h-------------------------*\
-|   An input rule based on a dynamicobject			             |
-|                                                                            |
-|   Changelog :                                                              |
-|               15/08/2008 - WT  - Initial release                           |
-\*--------------------------------------------------------------------------*/
-
-
-
 #include <boost/shared_ptr.hpp>
 
 #include "../include/crule.h"
 #include "../include/ctranslationevents.h"
 
 #include "../../core/include/cmessage.h"
-#include "../../core/include/cmessagetype.h"
-#include "../../core/include/cmessagemanager.h"
+#include "../../core/messages/include/messagetype.h"
+#include "../../core/messages/include/messenger.h"
 #include "../../core/include/cmessagemodule.h"
 
 #include "../../dynamicobject/include/dynamicobject.h"
 #include "../../dynamicobject/include/dynamicobjectmanager.h"
-
 
 using namespace std;
 using namespace boost;
 using namespace Gnoll::Core;
 using namespace Gnoll::DynamicObject;
 
-
 namespace Gnoll
 {
-
 	namespace Input
 	{
 
@@ -119,7 +106,7 @@ namespace Gnoll
 
 		bool CRule::fireAction() const
 		{
-			CMessageType actionEventType(ACTION_EVENT_TYPE);
+			Messages::MessageType actionEventType(ACTION_EVENT_TYPE);
 
 			ActionEvent actionEvent(m_action, 1.0f);
 
@@ -127,11 +114,12 @@ namespace Gnoll
 			shared_ptr<CMessage>  actionMessage (new CMessage( actionEventType, data ));
 
 			std::ostringstream tmpString;
-			if (CMessageModule::getInstancePtr()->getMessageManager()->queueMessage(actionMessage) == true)
+			try
 			{
+				CMessageModule::getInstancePtr()->getMessageManager()->queueMessage(actionMessage);
 				tmpString << "Message ajoute ["<< m_action << "]";
 			}
-			else
+			catch(...)
 			{
 				tmpString << "Message NON ajoute ["<< m_action << "]";
 			}

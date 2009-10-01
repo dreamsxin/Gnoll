@@ -1,5 +1,5 @@
 #/***************************************************************************
-# *   Copyright (C) 2008 by Huau Gabriel                                    *
+# *   Copyright (C) 2009 by Huau Gabriel                                    *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU General Public License as published by  *
@@ -216,6 +216,16 @@ env.Alias('install',   Alias('build'))
 
 AlwaysBuild(env.Alias('doc',   action = doc))
 AlwaysBuild(env.Alias('check', action = check))
-AlwaysBuild(env.Alias('build', SConscript('src/SConsbuild', variant_dir="build/" + build_dir)))
-AlwaysBuild(env.Alias('tests', SConscript('src/SConstests', variant_dir="build/" + build_dir)))
+
+binDir = "./"
+if SCons.__version__ < "1.2.0":
+	Export('binDir')
+	AlwaysBuild(env.Alias('build', SConscript('src/SConsbuild')))
+	AlwaysBuild(env.Alias('tests', SConscript('src/SConstests')))
+else:
+	binDir = "../../"
+	Export('binDir')
+	AlwaysBuild(env.Alias('build', SConscript('src/SConsbuild', variant_dir="build/" + build_dir)))
+	AlwaysBuild(env.Alias('tests', SConscript('src/SConstests', variant_dir="build/" + build_dir)))
+
 env.Alias('install', install(env))

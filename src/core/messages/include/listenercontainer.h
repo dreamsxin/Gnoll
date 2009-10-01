@@ -17,59 +17,52 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#ifndef __LISTENERCONTAINER_H__
+#define __LISTENERCONTAINER_H__
 
-/*---------------------------cmessagelistener------------------------------*\
-|   This is a message's listener                                            |
-|                                                                           |
-|   Changelog :                                                             |
-|               05/15/2006 - Paf - Initial release                          |
-|               04/10/2006 - Gabriel - Add namespace Gnoll and Core         |
-|                                                                           |
-\*-------------------------------------------------------------------------*/
-
-
-#include <string>
 #include <boost/shared_ptr.hpp>
-
-#include "../include/cmessage.h"
-
-#ifndef __CMESSAGELISTENER_H__
-#define __CMESSAGELISTENER_H__
-
-using namespace std;
-using namespace boost;
+#include <boost/function.hpp>
+#include <map>
 
 namespace Gnoll
 {
 	namespace Core
 	{
-		/**
-		 *	A message listener.
-		 *	This is a base implementation for all of the message's handler
-		 */
-		class CMessageListener
+		namespace Messages
 		{
+			class Listener;
+			class MessageType;
 
-			public:
+			class ListenerContainer
+			{
+				public:
+					typedef boost::shared_ptr<Listener> ListenerPtr;
+					typedef boost::function<void (ListenerContainer::ListenerPtr &) > ForEachFunction;
 
-				/**
-				 * This is a constructor
-				 */
-				CMessageListener() {}
+					ListenerContainer();
+					virtual ~ListenerContainer();
 
-				/**
-				 * This is a destructor
-				 */
-				virtual ~CMessageListener() {}
+					void add(ListenerPtr listener, const MessageType & messageType);
+					void del(ListenerPtr listener, const MessageType & messageType);
 
-				/**
-				 * This method is called in order to process a message
-				 * @param message The message this method will have to process
-				 */
-				virtual void handle ( shared_ptr<CMessage> message ) = 0;
+                                        // TODO : not sure if next method should be public
+					bool isListenerAssociatedToType(ListenerPtr listener, const MessageType & messageType);
+					bool hasListenerForType(const MessageType & messageType);
 
+					void forEach(const MessageType & messageType, ForEachFunction function);
 
-		};
-	};
-};
-#endif // __CMESSAGELISTENER_H__
+				private:
+					typedef std::multimap<MessageType, ListenerPtr > ContainerType;
+
+					ContainerType m_listeners;
+
+					void throwIfAlreadyListeningToType(ListenerPtr listener, const MessageType & messageType);
+					bool isAlreadyListeningToType(ListenerPtr listener, const MessageType & messageType);
+					ContainerType::iterator getListenerIteratorForType(ListenerPtr listener, const MessageType & messageType);
+			};
+		}
+	}
+}
+
+#endif
+
