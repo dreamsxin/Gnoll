@@ -20,60 +20,63 @@
 #ifndef __GENERICMESSENGER_H__
 #define __GENERICMESSENGER_H__
 
-#include "../include/messenger.h"
-#include <boost/thread/recursive_mutex.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 #include <list>
 
 namespace Gnoll
 {
 	namespace Core
 	{
+		class CMessage;
+
 		namespace Messages
 		{
-			class ListenerContainer;
+			class MessageType;
 
-			/** 
-			 *
-			 * In this implementation, adding a listener during a forEach call
-			 * in the same thread causes a deadlock (TODO)
-			 */
-			class GenericMessenger: public Messenger
+			class MessageQueue
 			{
-				public :
-					GenericMessenger();
-					virtual ~GenericMessenger();
+				public:
+					typedef boost::shared_ptr<CMessage> MessagePtr;
+					typedef boost::function<void (const MessagePtr &) > ForEachFunction;
 
-					virtual void addListener(ListenerPtr listener, const MessageType & messageType);
-					virtual void delListener(ListenerPtr listener, const MessageType & messageType);
+					MessageQueue();
+					~MessageQueue();
 
-					virtual void triggerMessage(MessagePtr message);
-					virtual void queueMessage(MessagePtr message);
+					void pushMessage(MessagePtr message);
 
-					virtual void abortFirstMessage(const MessageType & messageType);
-					virtual void abortAllMessages(const MessageType & messageType);
+					void abortFirstOfType(const MessageType & messageType);
+					void abortAllOfType(const MessageType & messageType);
 
-					virtual void processQueue();
+					bool isEmpty() const;
 
-				private :
-					void throwIfMessageNotValid(MessagePtr message);
-					void throwIfTypeNotValid(const MessageType & type);
-					void throwIfNoListenerForMessage(MessagePtr message);
+					void forEachAndClear(ForEachFunction function);
 
-					void addMessageToCurrentQueue(MessagePtr message);
+				private:
+					typedef std::list<MessagePtr> MessageContainer;
+					typedef std::list<MessagePtr> * MessageContainerPtr;
 
-					static const unsigned int MAX_NUMBER_OF_QUEUES = 2;
+					enum
+					{
+						NUMBER_OF_QUEUES = 2
+					};
 
-					boost::recursive_mutex m_listenersMutex;
-					ListenerContainer * m_listeners;
+					MessageContainer m_messages[NUMBER_OF_QUEUES];
+					MessageContainerPtr m_writtenMessages;
+					MessageContainerPtr m_readMessages;
 
-					/**
-					* Message queues are double buffered to avoid messaging loops.
-					*/
-					std::list< MessagePtr > m_messages[MAX_NUMBER_OF_QUEUES];
-					boost::recursive_mutex m_messagesMutex[MAX_NUMBER_OF_QUEUES];
+					unsigned int m_writtenQueue;
+					unsigned int m_readQueue;
 
-					unsigned int m_activeQueue;
-					boost::recursive_mutex m_activeQueueMutex;
+					void clearReadMessages();
+
+					MessageContainer & getWrittenMessages();
+					const MessageContainer & getWrittenMessages() const;
+
+					MessageContainer & getReadMessages();
+					const MessageContainer & getReadMessages() const;
+
+					void SwapContainer();
 			};
 		}
 	}

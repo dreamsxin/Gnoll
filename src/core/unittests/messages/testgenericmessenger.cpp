@@ -15,8 +15,6 @@ namespace
 {
 	static std::string MESSAGE_TYPENAME_1("type1");
 	static std::string MESSAGE_TYPENAME_2("type2");
-
-	static std::string MESSAGE("message");
 }
 
 struct MockListener : public Listener
