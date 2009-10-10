@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Puzzle Team                                     *
+ *   Copyright (C) 2006 by Gnoll Team                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -64,9 +64,6 @@ namespace Gnoll
 					MessageContainer m_messages[NUMBER_OF_QUEUES];
 					MessageContainerPtr m_writtenMessages;
 					MessageContainerPtr m_readMessages;
-
-					unsigned int m_writtenQueue;
-					unsigned int m_readQueue;
 
 					void clearReadMessages();
 

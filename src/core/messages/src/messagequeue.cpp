@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Puzzle Team                                     *
+ *   Copyright (C) 2006 by Gnoll Team                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -37,10 +37,12 @@ namespace Gnoll
 				}
 			}
 
-			MessageQueue::MessageQueue() :
-				m_writtenQueue(0),
-				m_readQueue(1)
+			MessageQueue::MessageQueue()
 			{
+				BOOST_STATIC_ASSERT(NUMBER_OF_QUEUES >= 2);
+
+				m_writtenMessages = &m_messages[0];
+				m_readMessages = &m_messages[1];
 				SwapContainer();
 			}
 
@@ -107,11 +109,7 @@ namespace Gnoll
 			
 			void MessageQueue::SwapContainer()
 			{
-				// TODO : no need for an index. Just swap the two pointers
-				m_writtenQueue = m_writtenQueue == 0 ? 1 : 0;
-				m_readQueue = m_readQueue == 0 ? 1 : 0;
-				m_writtenMessages = &m_messages[m_writtenQueue];
-				m_readMessages = &m_messages[m_readQueue];
+				std::swap(m_writtenMessages, m_readMessages);
 			}
 		}
 	}
