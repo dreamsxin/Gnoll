@@ -63,7 +63,6 @@ namespace Gnoll
 
 					static const unsigned int MAX_NUMBER_OF_QUEUES = 2;
 
-					boost::recursive_mutex m_listenersMutex;
 					ListenerContainer * m_listeners;
 
 					/**

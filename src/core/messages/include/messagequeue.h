@@ -22,6 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <list>
 
 namespace Gnoll
@@ -64,6 +65,9 @@ namespace Gnoll
 					MessageContainer m_messages[NUMBER_OF_QUEUES];
 					MessageContainerPtr m_writtenMessages;
 					MessageContainerPtr m_readMessages;
+
+					mutable boost::recursive_mutex m_writeMutex;
+					mutable boost::recursive_mutex m_readMutex;
 
 					void clearReadMessages();
 

@@ -43,7 +43,6 @@ namespace Gnoll
 
 				m_writtenMessages = &m_messages[0];
 				m_readMessages = &m_messages[1];
-				SwapContainer();
 			}
 
 			MessageQueue::~MessageQueue()
@@ -52,11 +51,13 @@ namespace Gnoll
 
 			void MessageQueue::pushMessage(MessagePtr message)
 			{
+				boost::recursive_mutex::scoped_lock writeLock(m_writeMutex);
 				getWrittenMessages().push_back(message);
 			}
 
 			void MessageQueue::abortFirstOfType(const MessageType & messageType)
 			{
+				boost::recursive_mutex::scoped_lock writeLock(m_writeMutex);
 				MessageContainer::iterator foundMessage = std::find_if(getWrittenMessages().begin(), getWrittenMessages().end(), boost::bind(Details::isMessageOfType, _1, messageType));
 
 				if (foundMessage != getWrittenMessages().end())
@@ -67,16 +68,19 @@ namespace Gnoll
 
 			void MessageQueue::abortAllOfType(const MessageType & messageType)
 			{
+				boost::recursive_mutex::scoped_lock writeLock(m_writeMutex);
 				getWrittenMessages().remove_if(boost::bind(Details::isMessageOfType, _1, messageType));
 			}
 
 			bool MessageQueue::isEmpty() const
 			{
+				boost::recursive_mutex::scoped_lock writeLock(m_writeMutex);
 				return getWrittenMessages().empty();
 			}
 
 			void MessageQueue::forEachAndClear(ForEachFunction function)
 			{
+				boost::recursive_mutex::scoped_lock readLock(m_readMutex);
 				SwapContainer();
 				std::for_each(getReadMessages().begin(), getReadMessages().end(), function);
 				clearReadMessages();
@@ -109,6 +113,7 @@ namespace Gnoll
 			
 			void MessageQueue::SwapContainer()
 			{
+				boost::recursive_mutex::scoped_lock writeLock(m_writeMutex);
 				std::swap(m_writtenMessages, m_readMessages);
 			}
 		}

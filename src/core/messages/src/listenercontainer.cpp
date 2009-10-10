@@ -40,7 +40,7 @@ namespace Gnoll
 				}
 			}
 
-                        // TODO : put concurrency back to container
+			// TODO : put concurrency back to container
 			ListenerContainer::ListenerContainer()
 			{
 			}
@@ -65,7 +65,7 @@ namespace Gnoll
 				return foundListener;
 			}
 
-			bool ListenerContainer::isAlreadyListeningToType(ListenerPtr listener, const MessageType & messageType)
+			bool ListenerContainer::isListenerAssociatedToType(ListenerPtr listener, const MessageType & messageType)
 			{
 				ContainerType::iterator it(getListenerIteratorForType(listener, messageType));
 
@@ -74,7 +74,7 @@ namespace Gnoll
 
 			void ListenerContainer::throwIfAlreadyListeningToType(ListenerPtr listener, const MessageType & messageType)
 			{
-				if (isAlreadyListeningToType(listener, messageType))
+				if (isListenerAssociatedToType(listener, messageType))
 				{
 					throw Exceptions::HandlerAlreadyRegistered();
 				}
@@ -82,6 +82,8 @@ namespace Gnoll
 
 			void ListenerContainer::add(ListenerPtr listener, const MessageType & messageType)
 			{
+				boost::recursive_mutex::scoped_lock lock(m_mutex);
+
 				throwIfAlreadyListeningToType(listener, messageType);
 
 				m_listeners.insert(std::pair<MessageType, ListenerPtr >(messageType, listener));
@@ -89,8 +91,9 @@ namespace Gnoll
 
 			void ListenerContainer::del(ListenerPtr listener, const MessageType & messageType)
 			{
-				ContainerType::iterator it(getListenerIteratorForType(listener, messageType));
+				boost::recursive_mutex::scoped_lock lock(m_mutex);
 
+				ContainerType::iterator it(getListenerIteratorForType(listener, messageType));
 				if (it == ContainerType::iterator())
 				{
 					throw Exceptions::CannotDeleteListener();
@@ -101,22 +104,19 @@ namespace Gnoll
 				}
 			}
 
-			bool ListenerContainer::isListenerAssociatedToType(ListenerPtr listener, const MessageType & messageType)
+			bool ListenerContainer::hasListenerForType(const MessageType & messageType) const
 			{
-				ContainerType::iterator it(getListenerIteratorForType(listener, messageType));
+				boost::recursive_mutex::scoped_lock lock(m_mutex);
 
-				return it != ContainerType::iterator();
-			}
-
-			bool ListenerContainer::hasListenerForType(const MessageType & messageType)
-			{
-				ContainerType::iterator it = m_listeners.lower_bound(messageType);
+				ContainerType::const_iterator it = m_listeners.lower_bound(messageType);
 
 				return it != m_listeners.end();
 			}
 
 			void ListenerContainer::forEach(const MessageType & messageType, ForEachFunction function)
 			{
+				boost::recursive_mutex::scoped_lock lock(m_mutex);
+
 				ContainerType::iterator itEnd = m_listeners.upper_bound(messageType);
 
 				for (ContainerType::iterator it = m_listeners.lower_bound(messageType); it != itEnd; ++it)

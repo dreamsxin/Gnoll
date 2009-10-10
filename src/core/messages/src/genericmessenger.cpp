@@ -69,7 +69,7 @@ namespace Gnoll
 
 			GenericMessenger::~GenericMessenger()
 			{
-                            delete m_listeners;
+				delete m_listeners;
 			}
 
 			void GenericMessenger::throwIfTypeNotValid(const MessageType & type)
@@ -109,8 +109,6 @@ namespace Gnoll
 			{
 				throwIfMessageNotValid(message);
 				throwIfNoListenerForMessage(message);
-
-				boost::recursive_mutex::scoped_lock lock(m_listenersMutex);
 
 				// TODO : MSG_ANYTYPE could be kept somewhere
 				Details::Sender sendToListener(message);

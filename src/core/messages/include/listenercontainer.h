@@ -22,6 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <map>
 
 namespace Gnoll
@@ -45,9 +46,8 @@ namespace Gnoll
 					void add(ListenerPtr listener, const MessageType & messageType);
 					void del(ListenerPtr listener, const MessageType & messageType);
 
-                                        // TODO : not sure if next method should be public
+					bool hasListenerForType(const MessageType & messageType) const;
 					bool isListenerAssociatedToType(ListenerPtr listener, const MessageType & messageType);
-					bool hasListenerForType(const MessageType & messageType);
 
 					void forEach(const MessageType & messageType, ForEachFunction function);
 
@@ -56,8 +56,10 @@ namespace Gnoll
 
 					ContainerType m_listeners;
 
+					mutable boost::recursive_mutex m_mutex;
+
 					void throwIfAlreadyListeningToType(ListenerPtr listener, const MessageType & messageType);
-					bool isAlreadyListeningToType(ListenerPtr listener, const MessageType & messageType);
+
 					ContainerType::iterator getListenerIteratorForType(ListenerPtr listener, const MessageType & messageType);
 			};
 		}
