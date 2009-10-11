@@ -39,7 +39,11 @@ namespace Gnoll
 					// Listener();
 					virtual ~Listener() {}
 
-					// TODO : I don't like "handle". Change to process later
+					/** Method to be defined by Listener implementation to handle messages.
+					 *
+					 * When a message type corresponds to a type listened by the Listener implementation,
+					 * handle is called with the message by the messenger.
+					 */
 					virtual void handle(MessagePtr receivedMessage) = 0;
 			};
 		}

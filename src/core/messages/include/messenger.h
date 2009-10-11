@@ -40,6 +40,9 @@ namespace Gnoll
 			/** Interface for message managers
 			*
 			* A message manager is in charge distributing messages to corresponding listeners.
+			*
+			* In any of the methods with a message in parameter, InvalidMessage will be thrown if the message type is invalid.
+			* Being invalid nor not is determined by the Messenger implementation.
 			*/
 			class Messenger
 			{
@@ -50,14 +53,37 @@ namespace Gnoll
 					// Messenger();
 					virtual ~Messenger() {};
 
+					/** Adds an association between the listener and a message type.
+					 *
+					 * @throw if the association already exists, throws HandlerAlreadyRegistered
+					 */
 					virtual void addListener(ListenerPtr listener, const MessageType & messagetype) = 0;
+
+					/** Removes an association between the listener and a message type.
+					 *
+					 * @throw if the association doesn't exists, throws CannotDeleteListener
+					 */
 					virtual void delListener(ListenerPtr listener, const MessageType & messagetype) = 0;
 
+					/** Sends the given message to all listeners associated with its message type immediatly
+					 *
+					 * @throw if no listener is associated to the message type, NoOneIsListening is thrown.
+					 */
 					virtual void triggerMessage(MessagePtr message) = 0;
+
+					/** Adds the given message to the queue for later processin by processQueue()
+					 *
+					 * @throw if no listener is associated to the message type, NoOneIsListening is thrown.
+					 */
 					virtual void queueMessage(MessagePtr message ) = 0;
+
+					/** Aborts the first message of the given type in the queue. */
 					virtual void abortFirstMessage(const MessageType & messagetype) = 0;
+
+					/** Aborts all messages of the given type in the queue. */
 					virtual void abortAllMessages(const MessageType & messagetype) = 0;
 
+					/** Sends all queued messages to all listeners associated with their respective type. */
 					virtual void processQueue() = 0;
 			};
 		}

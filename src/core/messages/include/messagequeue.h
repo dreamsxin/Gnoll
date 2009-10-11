@@ -35,6 +35,7 @@ namespace Gnoll
 		{
 			class MessageType;
 
+			/** A specialized and thread safe queue handling messages. */
 			class MessageQueue
 			{
 				public:
@@ -44,13 +45,29 @@ namespace Gnoll
 					MessageQueue();
 					~MessageQueue();
 
+					/** Adds a message to the queue.
+					 *
+					 * If pushMessage is called because directly or indirectly by forEachAndClear, the
+					 * message is not added to the current handled queue.
+					 */
 					void pushMessage(MessagePtr message);
 
+					/** Aborts the first message of the given type in the queue. */
 					void abortFirstOfType(const MessageType & messageType);
+
+					/** Aborts all messages of the given type in the queue. */
 					void abortAllOfType(const MessageType & messageType);
 
+					/** Checks if the queue is empty.
+					 *
+					 * @return true if the queue has no element. When called directly or indirectly from forEachAndClear, returns false.
+					 */
 					bool isEmpty() const;
 
+					/** Calls a function for all pushed messages.
+					 *
+					 * The messages are called in the order they were pushed.
+					 */
 					void forEachAndClear(ForEachFunction function);
 
 				private:

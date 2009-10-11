@@ -34,6 +34,11 @@ namespace Gnoll
 			class Listener;
 			class MessageType;
 
+			/** Specialized and thread safe container for Listeners.
+			 *
+			 * The Listener container associates Listener instantes and message types.
+			 * It can then call a functor for a given message type calling each listener listening to this type.
+			 */
 			class ListenerContainer
 			{
 				public:
@@ -43,12 +48,34 @@ namespace Gnoll
 					ListenerContainer();
 					virtual ~ListenerContainer();
 
+					/** Adds an association between the listener and a message type.
+					 *
+					 * @throw if the association already exists, throws HandlerAlreadyRegistered
+					 */
 					void add(ListenerPtr listener, const MessageType & messageType);
+
+					/** Removes an association between the listener and a message type.
+					 *
+					 * @throw if the association doesn't exists, throws CannotDeleteListener
+					 */
 					void del(ListenerPtr listener, const MessageType & messageType);
 
+					/** Checks if an association has been added for the given message type.
+					 *
+					 * @return true if there is a listener associated to the given message type. false if not.
+					 */
 					bool hasListenerForType(const MessageType & messageType) const;
+
+					/** Checks if a given listener is associated to a given message type.
+					 *
+					 * @return true if the given listener is associated to the given message type. false if not.
+					 */
 					bool isListenerAssociatedToType(ListenerPtr listener, const MessageType & messageType);
 
+					/** Calls the given function for each listener associated to the given message type.
+					 *
+					 * The order of listeners passed to the function is undefined.
+					 */
 					void forEach(const MessageType & messageType, ForEachFunction function);
 
 				private:
