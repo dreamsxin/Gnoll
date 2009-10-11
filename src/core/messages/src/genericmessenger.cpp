@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Puzzle Team                                     *
+ *   Copyright (C) 2006 by Gnoll Team                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,17 +18,10 @@
  ***************************************************************************/
 
 #include "../include/genericmessenger.h"
-
 #include "../include/messagequeue.h"
-#include <iostream>
-#include <string>
-#include <boost/shared_ptr.hpp>
-#include <boost/bind.hpp>
-#include "../include/messagetype.h"
-#include "../include/listener.h"
-#include "../../include/cmessage.h"
-#include "../include/exceptions.h"
 #include "../include/listenercontainer.h"
+#include "../include/listener.h"
+#include "../include/exceptions.h"
 
 namespace Gnoll
 {
@@ -38,15 +31,10 @@ namespace Gnoll
 		{
 			namespace Details
 			{
-				static bool isMessageOfType(Messenger::MessagePtr message, const MessageType & type)
-				{
-					return message->getType() == type;
-				}
-
 				class Sender
 				{
 					public:
-						Sender(GenericMessenger::MessagePtr & message) :
+						Sender(const GenericMessenger::MessagePtr & message) :
 							m_message(message)
 						{
 							assert(message);
@@ -58,7 +46,7 @@ namespace Gnoll
 						}
 
 					private:
-						GenericMessenger::MessagePtr & m_message;
+						const GenericMessenger::MessagePtr & m_message;
 				};
 
 				struct TriggerMessage
@@ -70,7 +58,7 @@ namespace Gnoll
 
 					void operator()(const MessageQueue::MessagePtr & message)
 					{
-						m_messenger.triggerMessage(message);
+						m_messenger.uncheckedTriggerMessage(message);
 					}
 
 					GenericMessenger & m_messenger;
@@ -125,6 +113,11 @@ namespace Gnoll
 				throwIfMessageNotValid(message);
 				throwIfNoListenerForMessage(message);
 
+				uncheckedTriggerMessage(message);
+			}
+
+			void GenericMessenger::uncheckedTriggerMessage(const MessagePtr & message)
+			{
 				// TODO : MSG_ANYTYPE could be kept somewhere
 				Details::Sender sendToListener(message);
 				m_listeners->forEach(MessageType(MSG_ANYTYPE), sendToListener);

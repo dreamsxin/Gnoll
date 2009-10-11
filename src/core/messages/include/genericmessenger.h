@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Puzzle Team                                     *
+ *   Copyright (C) 2006 by Gnoll Team                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,8 +21,6 @@
 #define __GENERICMESSENGER_H__
 
 #include "messenger.h"
-#include <boost/thread/recursive_mutex.hpp>
-#include <list>
 #include <memory>
 
 namespace Gnoll
@@ -56,10 +54,12 @@ namespace Gnoll
 
 					virtual void processQueue();
 
+					void uncheckedTriggerMessage(const MessagePtr & message);
 				private :
 					void throwIfMessageNotValid(MessagePtr message);
 					void throwIfTypeNotValid(const MessageType & type);
 					void throwIfNoListenerForMessage(MessagePtr message);
+
 
 					std::auto_ptr<ListenerContainer> m_listeners;
 					std::auto_ptr<MessageQueue> m_messageQueue;
