@@ -17,8 +17,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef __GENERICMESSENGER_H__
-#define __GENERICMESSENGER_H__
+#ifndef __MESSAGEQUEUE_H__
+#define __MESSAGEQUEUE_H__
 
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>

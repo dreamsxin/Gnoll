@@ -20,9 +20,10 @@
 #ifndef __GENERICMESSENGER_H__
 #define __GENERICMESSENGER_H__
 
-#include "../include/messenger.h"
+#include "messenger.h"
 #include <boost/thread/recursive_mutex.hpp>
 #include <list>
+#include <memory>
 
 namespace Gnoll
 {
@@ -31,6 +32,7 @@ namespace Gnoll
 		namespace Messages
 		{
 			class ListenerContainer;
+			class MessageQueue;
 
 			/** 
 			 *
@@ -59,20 +61,8 @@ namespace Gnoll
 					void throwIfTypeNotValid(const MessageType & type);
 					void throwIfNoListenerForMessage(MessagePtr message);
 
-					void addMessageToCurrentQueue(MessagePtr message);
-
-					static const unsigned int MAX_NUMBER_OF_QUEUES = 2;
-
-					ListenerContainer * m_listeners;
-
-					/**
-					* Message queues are double buffered to avoid messaging loops.
-					*/
-					std::list< MessagePtr > m_messages[MAX_NUMBER_OF_QUEUES];
-					boost::recursive_mutex m_messagesMutex[MAX_NUMBER_OF_QUEUES];
-
-					unsigned int m_activeQueue;
-					boost::recursive_mutex m_activeQueueMutex;
+					std::auto_ptr<ListenerContainer> m_listeners;
+					std::auto_ptr<MessageQueue> m_messageQueue;
 			};
 		}
 	}

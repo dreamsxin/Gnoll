@@ -19,6 +19,7 @@
 
 #include "../include/genericmessenger.h"
 
+#include "../include/messagequeue.h"
 #include <iostream>
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -59,17 +60,31 @@ namespace Gnoll
 					private:
 						GenericMessenger::MessagePtr & m_message;
 				};
+
+				struct TriggerMessage
+				{
+					TriggerMessage(GenericMessenger & messenger) :
+						m_messenger(messenger)
+					{
+					}
+
+					void operator()(const MessageQueue::MessagePtr & message)
+					{
+						m_messenger.triggerMessage(message);
+					}
+
+					GenericMessenger & m_messenger;
+				};
 			}
 
 			GenericMessenger::GenericMessenger() :
-				m_activeQueue(0)
+				m_listeners(new ListenerContainer()),
+				m_messageQueue(new MessageQueue)
 			{
-				m_listeners = new ListenerContainer();
 			}
 
 			GenericMessenger::~GenericMessenger()
 			{
-				delete m_listeners;
 			}
 
 			void GenericMessenger::throwIfTypeNotValid(const MessageType & type)
@@ -116,63 +131,31 @@ namespace Gnoll
 				m_listeners->forEach(message->getType(), sendToListener);
 			}
 
-			void GenericMessenger::addMessageToCurrentQueue(MessagePtr message)
-			{
-				boost::recursive_mutex::scoped_lock lockAQ(m_activeQueueMutex);
-				boost::recursive_mutex::scoped_lock lockMsg(m_messagesMutex[m_activeQueue]);
-
-				m_messages[m_activeQueue].push_back(message);
-			}
-
 			void GenericMessenger::queueMessage(MessagePtr message)
 			{
 				throwIfMessageNotValid(message);
 				throwIfNoListenerForMessage(message);
 
-				addMessageToCurrentQueue(message);
+				m_messageQueue->pushMessage(message);
 			}
 
 			void GenericMessenger::abortFirstMessage(const MessageType & messageType)
 			{
 				throwIfTypeNotValid(messageType);
-				boost::recursive_mutex::scoped_lock lockAQ(m_activeQueueMutex);
-				boost::recursive_mutex::scoped_lock lockMsg(m_messagesMutex[m_activeQueue]);
 
-				list<MessagePtr> & messages = m_messages[m_activeQueue];
-
-				list<MessagePtr>::iterator foundMessage = std::find_if(messages.begin(), messages.end(), boost::bind(Details::isMessageOfType, _1, messageType));
-
-				if (foundMessage != messages.end())
-				{
-					messages.erase(foundMessage);
-				}
+				m_messageQueue->abortFirstOfType(messageType);
 			}
 
 			void GenericMessenger::abortAllMessages(const MessageType & messageType)
 			{
 				throwIfTypeNotValid(messageType);
-				boost::recursive_mutex::scoped_lock lockAQ(m_activeQueueMutex);
-				boost::recursive_mutex::scoped_lock lockMsg(m_messagesMutex[m_activeQueue]);
 
-				list<MessagePtr> & messages = m_messages[m_activeQueue];
-
-				messages.remove_if(boost::bind(Details::isMessageOfType, _1, messageType));
+				m_messageQueue->abortAllOfType(messageType);
 			}
 
 			void GenericMessenger::processQueue()
 			{
-				boost::recursive_mutex::scoped_lock lockAQ(m_activeQueueMutex);
-				boost::recursive_mutex::scoped_lock lockMsg(m_messagesMutex[m_activeQueue]);
-
-				unsigned int queuetoprocess = m_activeQueue;
-				m_activeQueue = (m_activeQueue + 1) % MAX_NUMBER_OF_QUEUES;
-
-				for ( list<MessagePtr>::iterator itmsg = m_messages[queuetoprocess].begin(); itmsg != m_messages[queuetoprocess].end(); itmsg++ )
-				{
-					triggerMessage(*itmsg);
-				}
-
-				m_messages[queuetoprocess].clear();
+				m_messageQueue->forEachAndClear(Details::TriggerMessage(*this));
 			}
 		}
 	}
