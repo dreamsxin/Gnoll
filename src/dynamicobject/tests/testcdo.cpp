@@ -43,7 +43,7 @@
 #include "../include/inherits.h"
 
 #include "../../core/include/sourcefile.h"
-#include "../../core/include/istream.h"
+#include "../../core/include/abstractstream.h"
 
 
 using namespace std;
@@ -54,12 +54,12 @@ using namespace Gnoll::DynamicObject;
 
 
 
-class PJ : public CDynamicObjectProxy
+class PJ : public DynamicObjectProxy
 {
 
 	public:
 	
-		PJ(string _instanceName) : CDynamicObjectProxy(_instanceName)
+		PJ(string _instanceName) : DynamicObjectProxy(_instanceName)
 		{
 		
 		}
@@ -85,8 +85,8 @@ int main() {
 
 
 
-	shared_ptr<ISource> loadChannel(new SourceFile(".", false));
-	shared_ptr<ISource> saveChannel(new SourceFile(".", true));
+	shared_ptr<AbstractSource> loadChannel(new SourceFile(".", false));
+	shared_ptr<AbstractSource> saveChannel(new SourceFile(".", true));
 
 	DynamicObjectManager *pom = DynamicObjectManager::getInstancePtr();
 

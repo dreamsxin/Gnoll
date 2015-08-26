@@ -17,22 +17,22 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "core/include/isource.h"
+#include "core/include/abstractsource.h"
 #include "dynamicobject/include/dynamicobjectmanager.h"
 #include "core/include/sourcefile.h"
 #include "core/messages/include/listener.h"
 
-#include "input/include/coisinputmodule.h"
-#include "input/include/cinputmouseevents.h"
-#include "input/include/cinputeventstranslator.h"
-#include "graphic/include/cgraphicmodule.h"
-#include "time/include/ctimemodule.h"
-#include "sound/include/csoundmodule.h"
-#include "scene/include/cscenemanager.h"
-#include "scene/include/cameramanager.h"
-#include "stats/include/cstatsmodule.h"
-#include "log/include/clogmacros.h"
-#include "input/include/ctranslationevents.h"
+#include "input/include/oisinputmodule.h"
+#include "input/include/inputmouseevents.h"
+#include "input/include/inputeventstranslator.h"
+#include "graphic/include/graphicmodule.h"
+#include "time/include/timemodule.h"
+#include "sound/include/soundmodule.h"
+#include "scene/include/scenemanager.h"
+#include "scene/camera/include/cameramanager.h"
+#include "stats/include/statsmodule.h"
+#include "log/include/logmacros.h"
+#include "input/include/translationevents.h"
 #include "config.h"
 
 #include <boost/shared_ptr.hpp>
@@ -67,17 +67,17 @@ namespace Gnoll
 	/**
 	 * Application class, the main class
 	 */
-	class Application : public Gnoll::Core::CModule, public Gnoll::Core::Singleton<Application>
+	class Application : public Gnoll::Core::Module, public Gnoll::Core::Singleton<Application>
 	{
 		private:
-			CLogModule *            logModule;
-			CGraphicModule*         graphicmanager;
-			COISInputModule         inputmanager;
-			CTimeModule*            timeModule;
-			CMessageModule*         messageModule;
-			CSoundModule *          soundmanager;
-			CInputEventsTranslator* inputEventsTranslator;
-			CStatsModule*           statsModule;
+			LogModule *            logModule;
+			GraphicModule*         graphicmanager;
+			OISInputModule         inputmanager;
+			TimeModule*            timeModule;
+			MessageModule*         messageModule;
+			SoundModule *          soundmanager;
+			InputEventsTranslator* inputEventsTranslator;
+			StatsModule*           statsModule;
 
 
 			bool done;
@@ -181,7 +181,7 @@ namespace Gnoll
 		}
 
 
-		CLogModule *logModule = CLogModule::getInstancePtr();
+		LogModule *logModule = LogModule::getInstancePtr();
 
 		if (vm.count("log"))
 		{
@@ -203,14 +203,12 @@ namespace Gnoll
 		 */
 		if (vm.count("load-source-directory"))
 		{
-
-
 			vector<string> lsd = vm["load-source-directory"].as< vector<string> >();
 			for (vector<string>::iterator it = lsd.begin(); it != lsd.end(); it++)
 			{
 
 				GNOLL_LOG() << "Adding new load source directory : \n";
-				shared_ptr<ISource> userLoadChannel(new SourceFile(*it, false, 10));
+				shared_ptr<AbstractSource> userLoadChannel(new SourceFile(*it, false, 10));
 				pom->addLoadSource(userLoadChannel);
 				soundManager->addLoadSource(userLoadChannel);
 				cameraManager->addLoadSource(userLoadChannel);
@@ -223,13 +221,12 @@ namespace Gnoll
 		 */
 		if (vm.count("save-source-directory"))
 		{
-
 			vector<string> lsd = vm["save-source-directory"].as< vector<string> >();
 			for (vector<string>::iterator it = lsd.begin(); it != lsd.end(); it++)
 			{
 
 				GNOLL_LOG() << "Adding new save source directory : \n";
-				shared_ptr<ISource> userSaveChannel(new SourceFile( *it, true, 10 ));
+				shared_ptr<AbstractSource> userSaveChannel(new SourceFile( *it, true, 10 ));
 				pom->addSaveSource(userSaveChannel);
 				soundManager->addSaveSource(userSaveChannel);
 				cameraManager->addLoadSource(userSaveChannel);
@@ -253,8 +250,8 @@ namespace Gnoll
 	{
 		// The very first thing to do is to add the current directory in DynamicObjectManager's list of repositories
 		// In case some modules would need to load some config files
-		shared_ptr<ISource> loadChannel(new SourceFile(".", false));
-		shared_ptr<ISource> saveChannel(new SourceFile(".", true));
+		shared_ptr<AbstractSource> loadChannel(new SourceFile(".", false));
+		shared_ptr<AbstractSource> saveChannel(new SourceFile(".", true));
 
 		DynamicObjectManager *pom = DynamicObjectManager::getInstancePtr();
 		SoundManager *soundManager = SoundManager::getInstancePtr();
@@ -273,15 +270,14 @@ namespace Gnoll
 		 */
 
 		GNOLL_LOG() << "Instanciating modules...\n";
-		logModule             = CLogModule::getInstancePtr();
-		graphicmanager        = CGraphicModule::getInstancePtr();
-		timeModule            = CTimeModule::getInstancePtr();
-		messageModule         = CMessageModule::getInstancePtr();
-		soundmanager          = CSoundModule::getInstancePtr();
-		inputEventsTranslator = CInputEventsTranslator::getInstancePtr();
-		statsModule           = CStatsModule::getInstancePtr();
+		logModule             = LogModule::getInstancePtr();
+		graphicmanager        = GraphicModule::getInstancePtr();
+		timeModule            = TimeModule::getInstancePtr();
+		messageModule         = MessageModule::getInstancePtr();
+		soundmanager          = SoundModule::getInstancePtr();
+		inputEventsTranslator = InputEventsTranslator::getInstancePtr();
+		statsModule           = StatsModule::getInstancePtr();
 		GNOLL_LOG() << "Instanciating modules...[DONE]\n";
-
 
 		try
 		{
@@ -344,7 +340,7 @@ namespace Gnoll
 
 	void Application::process()
 	{
-		CSceneManager* gSceneManager = new CSceneManager("gSceneManager");
+		Gnoll::Scene::SceneManager* gSceneManager = new Gnoll::Scene::SceneManager("gSceneManager");
 		while (!done)
 		{
 			statsModule->process();
@@ -370,14 +366,14 @@ namespace Gnoll
 		logModule->exit();
 		statsModule->exit();
 
-		Gnoll::Stats::CStatsModule::destroy();
-		CSoundModule::destroy();
-		CTimeModule::destroy();
-		CInputEventsTranslator::destroy();
-		CGraphicModule::destroy();
-		CMessageModule::destroy();
-		CLogModule::destroy();
-		CStatsModule::destroy();
+		Gnoll::Stats::StatsModule::destroy();
+		SoundModule::destroy();
+		TimeModule::destroy();
+		InputEventsTranslator::destroy();
+		GraphicModule::destroy();
+		MessageModule::destroy();
+		LogModule::destroy();
+		StatsModule::destroy();
 		Gnoll::DynamicObject::AttributeHandlerRegistry::destroy();
 
 		std::ostringstream tmpString;
